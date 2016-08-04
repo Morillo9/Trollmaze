@@ -19,7 +19,6 @@ pygame.init()
 screen = pygame.display.set_mode(DISPLAY, FLAGS, DEPTH)
 pygame.display.set_caption("Use arrows to move!")
 
-
 floor_resource = Spritesheet('./Floor.png')
 wall_resource = Spritesheet('./Wall.png')
 player_resource = Spritesheet('./hero.png')
@@ -33,21 +32,7 @@ player_right = player_resource.image_at((32, 0, 16, 16), colorkey=(-1))
 player_up = player_resource.image_at((0, 16, 16, 16), colorkey=(-1))
 player_down = player_resource.image_at((32, 32, 16, 16), colorkey=(-1))
 
-
-def main():
-    global cameraX, cameraY
-    timer = pygame.time.Clock()
-
-    up = down = left = right = running = False
-    bg = Surface((32,32))
-    bg.convert()
-    bg.fill(Color("#181818"))
-    entities = pygame.sprite.Group()
-    player = Player(16, 16)
-    platforms = []
-    x, y = 0, 0
-
-    level = [
+level = [
            '#####################################',
            '# #       #       #     #         # #',
            '# # ##### # ### ##### ### ### ### # #',
@@ -73,6 +58,19 @@ def main():
            '#X###################################',]
 
 
+def main():
+    global cameraX, cameraY, entities, platforms, bg, platform_dict
+    timer = pygame.time.Clock()
+
+    up = down = left = right = running = False
+    bg = Surface((32,32))
+    bg.convert()
+    bg.fill(Color("#181818"))
+    player = Player(16, 16)
+    platforms, platform_dict = [], []
+    entities = pygame.sprite.Group()
+    x, y = 0, 0
+
     while True:
         rand_x = random.randint(1, len(level) -1)
         rand_y = random.randint(1, len(level[0]) -1)
@@ -89,6 +87,7 @@ def main():
                 p = Platform(x, y)
                 platforms.append(p)
                 entities.add(p)
+                platform_dict.append((x, y))
             if col == "X":
                 e = ExitBlock(x, y)
                 platforms.append(e)
@@ -131,6 +130,8 @@ def main():
                 right = False
             if e.type == KEYUP and e.key == K_LEFT:
                 left = False
+            if e.type == KEYDOWN and e.key == K_SPACE:
+                player.move_blocks = True
 
         # draw background
         for y in range(32):
@@ -189,6 +190,7 @@ class Player(Entity):
         self.image = player_left
         self.image.convert()
         self.rect = Rect(x, y, 16, 16)
+        self.move_blocks = False
 
     def update(self, up, down, left, right, running, platforms):
         if up:
@@ -217,22 +219,35 @@ class Player(Entity):
         self.collide(0, self.yvel, platforms)
 
     def collide(self, xvel, yvel, platforms):
+
         for p in platforms:
             if pygame.sprite.collide_rect(self, p):
                 if isinstance(p, ExitBlock):
                     pygame.event.post(pygame.event.Event(QUIT))
                 if xvel > 0:
                     self.rect.right = p.rect.left
-                    print ("collide right")
                 if xvel < 0:
                     self.rect.left = p.rect.right
-                    print ("collide left")
                 if yvel > 0:
                     self.rect.bottom = p.rect.top
-                    self.onGround = True
                     self.yvel = 0
                 if yvel < 0:
                     self.rect.top = p.rect.bottom
+
+                if self.move_blocks is True:
+                    x = p.rect.x
+                    y = p.rect.y
+
+                    if self.image == player_up and (x, y - 32) not in platform_dict:
+                        p.rect.y -= 32
+                    elif self.image == player_right and (x + 32, y) not in platform_dict:
+                        p.rect.x += 32
+                    elif self.image == player_down and (x, y + 32) not in platform_dict:
+                        p.rect.y += 32
+                    elif self.image == player_left and (x - 32, y) not in platform_dict:
+                        p.rect.x -= 32
+
+                    self.move_blocks = False
 
 
 class Platform(Entity):
