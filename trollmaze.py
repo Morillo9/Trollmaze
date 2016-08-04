@@ -106,7 +106,6 @@ def main():
 
     while 1:
         timer.tick(60)
-        print(player.rect.x, player.rect.y)
 
         for e in pygame.event.get():
             if e.type == QUIT: raise SystemExit
