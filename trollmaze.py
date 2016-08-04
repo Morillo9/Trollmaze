@@ -240,12 +240,20 @@ class Player(Entity):
 
                     if self.image == player_up and (x, y - 32) not in platform_dict:
                         p.rect.y -= 32
+                        platform_dict.remove((x, y))
+                        platform_dict.append((x, y - 32))
                     elif self.image == player_right and (x + 32, y) not in platform_dict:
                         p.rect.x += 32
+                        platform_dict.remove((x, y))
+                        platform_dict.append((x + 32, y))
                     elif self.image == player_down and (x, y + 32) not in platform_dict:
                         p.rect.y += 32
+                        platform_dict.remove((x, y))
+                        platform_dict.append((x, y + 32))
                     elif self.image == player_left and (x - 32, y) not in platform_dict:
                         p.rect.x -= 32
+                        platform_dict.remove((x, y))
+                        platform_dict.append((x - 32 + y))
 
                     self.move_blocks = False
 
