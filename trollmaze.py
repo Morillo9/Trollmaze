@@ -23,10 +23,12 @@ floor_resource = Spritesheet('./Floor.png')
 wall_resource = Spritesheet('./Wall.png')
 player_resource = Spritesheet('./hero.png')
 exit_resource = Spritesheet('./Exit.png')
+troll_resource = Spritesheet('./troll_1.png')
 
 wall_sprite = wall_resource.image_at((0, 0, 32, 32), colorkey=(-1))
 floor_srite = floor_resource.image_at((0, 0, 32, 32), colorkey=(-1))
 exit_sprite = exit_resource.image_at((0, 0, 32, 32), colorkey=(-1))
+troll_sprite = troll_resource.image_at((0, 0, 20, 25), colorkey=(-1))
 player_left = player_resource.image_at((0, 0, 16, 16), colorkey=(-1))
 player_right = player_resource.image_at((32, 0, 16, 16), colorkey=(-1))
 player_up = player_resource.image_at((0, 16, 16, 16), colorkey=(-1))
@@ -67,9 +69,11 @@ def main():
     bg.convert()
     bg.fill(Color("#181818"))
     player = Player(16, 16)
-    platforms, platform_dict = [], []
+    platforms, platform_dict, troll_dictionary = [], [], []
     entities = pygame.sprite.Group()
     x, y = 0, 0
+
+
 
     while True:
         rand_x = random.randint(1, len(level) -1)
@@ -79,6 +83,19 @@ def main():
             player.rect.y = rand_x * 32 + 8
             player.rect.x = rand_y * 32 + 8
             break
+
+    while len(troll_dictionary) < 10:
+
+        rand_x = random.randint(1, len(level) -1)
+        rand_y = random.randint(1, len(level[0]) -1)
+        tmp_troll = Troll(20, 25)
+
+        if level[rand_x][rand_y] == " ":
+            tmp_troll.rect.y = rand_x * 32 + 8
+            tmp_troll.rect.x = rand_y * 32 + 8
+
+            troll_dictionary.append(tmp_troll)
+            entities.add(tmp_troll)
 
     # build the level
     for row in level:
@@ -141,7 +158,9 @@ def main():
         camera.update(player)
 
         # update player, draw everything else
-        player.update(up, down, left, right, running, platforms)
+        player.update(up, down, left, right, platforms)
+        for troll in troll_dictionary:
+            troll.update(platforms)
         for e in entities:
             screen.blit(e.image, camera.apply(e))
 
@@ -186,13 +205,12 @@ class Player(Entity):
         Entity.__init__(self)
         self.xvel = 0
         self.yvel = 0
-        self.onGround = False
         self.image = player_left
         self.image.convert()
         self.rect = Rect(x, y, 16, 16)
         self.move_blocks = False
 
-    def update(self, up, down, left, right, running, platforms):
+    def update(self, up, down, left, right, platforms):
         if up:
             self.yvel = -1
         if down:
@@ -213,8 +231,6 @@ class Player(Entity):
         self.collide(self.xvel, 0, platforms)
         # increment in y direction
         self.rect.top += self.yvel
-        # assuming we're in the air
-        self.onGround = False;
         # do y-axis collisions
         self.collide(0, self.yvel, platforms)
 
@@ -240,22 +256,59 @@ class Player(Entity):
 
                     if self.image == player_up and (x, y - 32) not in platform_dict:
                         p.rect.y -= 32
-                        platform_dict.remove((x, y))
                         platform_dict.append((x, y - 32))
+                        platform_dict.remove((x, y))
                     elif self.image == player_right and (x + 32, y) not in platform_dict:
                         p.rect.x += 32
-                        platform_dict.remove((x, y))
                         platform_dict.append((x + 32, y))
+                        platform_dict.remove((x, y))
                     elif self.image == player_down and (x, y + 32) not in platform_dict:
                         p.rect.y += 32
-                        platform_dict.remove((x, y))
                         platform_dict.append((x, y + 32))
+                        platform_dict.remove((x, y))
                     elif self.image == player_left and (x - 32, y) not in platform_dict:
                         p.rect.x -= 32
+                        platform_dict.append((x - 32,  y))
                         platform_dict.remove((x, y))
-                        platform_dict.append((x - 32 + y))
 
                     self.move_blocks = False
+
+class Troll(Entity):
+
+    def __init__(self, x, y):
+        Entity.__init__(self)
+        self.xvel = random.choice([-1, 1, 0])
+        self.yvel = 0 if self.xvel != 0 else random.choice([-1, 1])
+        self.image = troll_sprite
+        self.image.convert()
+        self.rect = Rect(x, y, 20, 25)
+
+    def update(self, platforms):
+        self.rect.left += self.xvel
+        self.collide(self.xvel, 0, platforms)
+        self.rect.top += self.yvel
+        self.collide(0, self.yvel, platforms)
+
+    def collide(self, xvel, yvel, platforms):
+
+        for p in platforms:
+            if pygame.sprite.collide_rect(self, p):
+                if xvel > 0:
+                    self.rect.right = p.rect.left
+                if xvel < 0:
+                    self.rect.left = p.rect.right
+                if yvel > 0:
+                    self.rect.bottom = p.rect.top
+                    self.yvel = 0
+                if yvel < 0:
+                    self.rect.top = p.rect.bottom
+
+                if self.xvel == 0:
+                    self.yvel = 0
+                    self.xvel = random.choice([-1, 1])
+                elif self.yvel == 0:
+                    self.xvel = 0
+                    self.yvel = random.choice([-1, 1])
 
 
 class Platform(Entity):
