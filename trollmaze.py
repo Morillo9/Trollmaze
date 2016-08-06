@@ -60,112 +60,6 @@ level = [
            '#X###################################',]
 
 
-def main():
-    global cameraX, cameraY, entities, platforms, bg, platform_dict
-    timer = pygame.time.Clock()
-
-    up = down = left = right = running = False
-    bg = Surface((32,32))
-    bg.convert()
-    bg.fill(Color("#181818"))
-    player = Player(16, 16)
-    platforms, platform_dict, troll_dictionary = [], [], []
-    entities = pygame.sprite.Group()
-    x, y = 0, 0
-
-
-
-    while True:
-        rand_x = random.randint(1, len(level) -1)
-        rand_y = random.randint(1, len(level[0]) -1)
-
-        if level[rand_x][rand_y] == " ":
-            player.rect.y = rand_x * 32 + 8
-            player.rect.x = rand_y * 32 + 8
-            break
-
-    while len(troll_dictionary) < 10:
-
-        rand_x = random.randint(1, len(level) -1)
-        rand_y = random.randint(1, len(level[0]) -1)
-        tmp_troll = Troll(20, 25)
-
-        if level[rand_x][rand_y] == " ":
-            tmp_troll.rect.y = rand_x * 32 + 8
-            tmp_troll.rect.x = rand_y * 32 + 8
-
-            troll_dictionary.append(tmp_troll)
-            entities.add(tmp_troll)
-
-    # build the level
-    for row in level:
-        for col in row:
-            if col == "#":
-                p = Platform(x, y)
-                platforms.append(p)
-                entities.add(p)
-                platform_dict.append((x, y))
-            if col == "X":
-                e = ExitBlock(x, y)
-                platforms.append(e)
-                entities.add(e)
-
-
-            x += 32
-        y += 32
-        x = 0
-
-    total_level_width  = len(level[0])*32
-    total_level_height = len(level)*32
-    camera = Camera(complex_camera, total_level_width, total_level_height)
-    entities.add(player)
-
-    while 1:
-        timer.tick(60)
-
-        for e in pygame.event.get():
-            if e.type == QUIT: raise SystemExit
-            if e.type == KEYDOWN and e.key == K_ESCAPE:
-                raise SystemExit
-            if e.type == KEYDOWN and e.key == K_UP:
-                up = True
-                player.image = player_up
-            if e.type == KEYDOWN and e.key == K_DOWN:
-                down = True
-                player.image = player_down
-            if e.type == KEYDOWN and e.key == K_LEFT:
-                left = True
-                player.image = player_left
-            if e.type == KEYDOWN and e.key == K_RIGHT:
-                right = True
-                player.image = player_right
-            if e.type == KEYUP and e.key == K_UP:
-                up = False
-            if e.type == KEYUP and e.key == K_DOWN:
-                down = False
-            if e.type == KEYUP and e.key == K_RIGHT:
-                right = False
-            if e.type == KEYUP and e.key == K_LEFT:
-                left = False
-            if e.type == KEYDOWN and e.key == K_SPACE:
-                player.move_blocks = True
-
-        # draw background
-        for y in range(32):
-            for x in range(32):
-                screen.blit(bg, (x * 32, y * 32))
-
-        camera.update(player)
-
-        # update player, draw everything else
-        player.update(up, down, left, right, platforms)
-        for troll in troll_dictionary:
-            troll.update(platforms)
-        for e in entities:
-            screen.blit(e.image, camera.apply(e))
-
-        pygame.display.update()
-
 class Camera(object):
     def __init__(self, camera_func, width, height):
         self.camera_func = camera_func
@@ -334,6 +228,117 @@ class ExitBlock(Platform):
         Platform.__init__(self, x, y)
         self.image = exit_sprite
         self.rect = Rect(x, y, 32, 32)
+
+
+def main():
+    global cameraX, cameraY, entities, platforms, bg, platform_dict
+    timer = pygame.time.Clock()
+
+    up = down = left = right = running = False
+    bg = Surface((32,32))
+    bg.convert()
+    bg.fill(Color("#181818"))
+    player = Player(16, 16)
+    platforms, platform_dict, troll_dictionary = [], [], []
+    entities = pygame.sprite.Group()
+    x, y = 0, 0
+
+
+
+    while True:
+        rand_x = random.randint(1, len(level) -1)
+        rand_y = random.randint(1, len(level[0]) -1)
+
+        if level[rand_x][rand_y] == " ":
+            player.rect.y = rand_x * 32 + 8
+            player.rect.x = rand_y * 32 + 8
+            break
+
+    while len(troll_dictionary) < 10:
+
+        rand_x = random.randint(1, len(level) -1)
+        rand_y = random.randint(1, len(level[0]) -1)
+        tmp_troll = Troll(20, 25)
+
+        if level[rand_x][rand_y] == " ":
+            tmp_troll.rect.y = rand_x * 32 + 8
+            tmp_troll.rect.x = rand_y * 32 + 8
+
+            troll_dictionary.append(tmp_troll)
+            entities.add(tmp_troll)
+
+    # build the level
+    for row in level:
+        for col in row:
+            if col == "#":
+                p = Platform(x, y)
+                platforms.append(p)
+                entities.add(p)
+                platform_dict.append((x, y))
+            if col == "X":
+                e = ExitBlock(x, y)
+                platforms.append(e)
+                entities.add(e)
+
+
+            x += 32
+        y += 32
+        x = 0
+
+    total_level_width  = len(level[0])*32
+    total_level_height = len(level)*32
+    camera = Camera(complex_camera, total_level_width, total_level_height)
+    entities.add(player)
+
+    while 1:
+        timer.tick(60)
+
+        for e in pygame.event.get():
+            if e.type == QUIT: raise SystemExit
+            if e.type == KEYDOWN and e.key == K_ESCAPE:
+                raise SystemExit
+            if e.type == KEYDOWN and e.key == K_UP:
+                up = True
+                player.image = player_up
+            if e.type == KEYDOWN and e.key == K_DOWN:
+                down = True
+                player.image = player_down
+            if e.type == KEYDOWN and e.key == K_LEFT:
+                left = True
+                player.image = player_left
+            if e.type == KEYDOWN and e.key == K_RIGHT:
+                right = True
+                player.image = player_right
+            if e.type == KEYUP and e.key == K_UP:
+                up = False
+            if e.type == KEYUP and e.key == K_DOWN:
+                down = False
+            if e.type == KEYUP and e.key == K_RIGHT:
+                right = False
+            if e.type == KEYUP and e.key == K_LEFT:
+                left = False
+            if e.type == KEYDOWN and e.key == K_SPACE:
+                player.move_blocks = True
+
+        # draw background
+        for y in range(32):
+            for x in range(32):
+                screen.blit(bg, (x * 32, y * 32))
+
+        camera.update(player)
+
+        # update player, draw everything else
+        player.update(up, down, left, right, platforms)
+        for troll in troll_dictionary:
+            troll.update(platforms)
+
+            if pygame.sprite.collide_circle(troll, player):
+                raise SystemExit
+        for e in entities:
+            screen.blit(e.image, camera.apply(e))
+
+        pygame.display.update()
+
 
 if __name__ == "__main__":
     main()
