@@ -222,32 +222,27 @@ def main():
     level = create_maze()
 
     while True:
-        rand_x = random.randint(1, len(level[0]))
-        rand_y = random.randint(1, len(level))
+        rand_x = random.randint(1, len(level[0])-1)
+        rand_y = random.randint(1, len(level)-1)
 
-        try:
-            if level[rand_x][rand_y] == " ":
-                player.rect.x = rand_x * 32 + 8
-                player.rect.y = rand_y * 32 + 8
-                break
-        except IndexError:
-            print(rand_x, rand_y)
+        if level[rand_y][rand_x] == " ":
+            player.rect.x = rand_x * 32 + 8
+            player.rect.y = rand_y * 32 + 8
+            break
+
 
     while len(troll_dictionary) < 10:
 
-        rand_x = random.randint(1, len(level[0]))
-        rand_y = random.randint(1, len(level))
+        rand_x = random.randint(1, len(level[0])-1)
+        rand_y = random.randint(1, len(level)-1)
         tmp_troll = Troll(20, 25)
 
-        try:
-            if level[rand_x][rand_y] == " ":
-                tmp_troll.rect.x = rand_x * 32 + 8
-                tmp_troll.rect.y = rand_y * 32 + 8
+        if level[rand_y][rand_x] == " ":
+            tmp_troll.rect.x = rand_x * 32 + 8
+            tmp_troll.rect.y = rand_y * 32 + 8
 
-                troll_dictionary.append(tmp_troll)
-                entities.add(tmp_troll)
-        except IndexError:
-            print(rand_x, rand_y)
+            troll_dictionary.append(tmp_troll)
+            entities.add(tmp_troll)
 
 
     # build the level
