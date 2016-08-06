@@ -1,7 +1,8 @@
 import random
-from random import shuffle, randrange
+from random import shuffle, randrange, randint
 
-def make_maze(w = 12, h = 11):
+
+def make_maze(w=12, h=11):
     vis = [[0] * w + [1] for _ in range(h)] + [[1] * (w + 1)]
     ver = [["#  "] * w + ['#'] for _ in range(h)] + [[]]
     hor = [["###"] * w + ['#'] for _ in range(h + 1)]
@@ -24,6 +25,7 @@ def make_maze(w = 12, h = 11):
         s += ''.join(a + ['\n'] + b + ['\n'])
     return s
 
+
 def create_maze():
     tmp = make_maze()
     cur_maze = tmp.split("\n")
@@ -32,5 +34,9 @@ def create_maze():
     for line in cur_maze:
         maze.append(line)
 
+    maze = maze[0:-2]
+
     return maze
 
+tmp = create_maze()
+print(len(tmp[0]), len(tmp))

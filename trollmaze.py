@@ -4,6 +4,8 @@ import pygame
 import random
 from pygame import *
 from spritesheet import *
+from mazegenerator import *
+
 
 WIN_WIDTH = 800
 WIN_HEIGHT = 640
@@ -33,31 +35,6 @@ player_left = player_resource.image_at((0, 0, 16, 16), colorkey=(-1))
 player_right = player_resource.image_at((32, 0, 16, 16), colorkey=(-1))
 player_up = player_resource.image_at((0, 16, 16, 16), colorkey=(-1))
 player_down = player_resource.image_at((32, 32, 16, 16), colorkey=(-1))
-
-level = [
-           '#####################################',
-           '# #       #       #     #         # #',
-           '# # ##### # ### ##### ### ### ### # #',
-           '#       #   # #     #     # # #   # #',
-           '##### # ##### ##### ### # # # ##### #',
-           '#   # #       #     # # # # #     # #',
-           '# # ####### # # ##### ### # ##### # #',
-           '# #       # # #   #     #     #   # #',
-           '# ####### ### ### # ### ##### # ### #',
-           '#     #   # #   # #   #     # #     #',
-           '# ### ### # ### # ##### # # # #######',
-           '#   #   # # #   #   #   # # #   #   #',
-           '####### # # # ##### # ### # ### ### #',
-           '#     # #     #   # #   # #   #     #',
-           '# ### # ##### ### # ### ### ####### #',
-           '# #   #     #     #   # # #       # #',
-           '# # ##### # ### ##### # # ####### # #',
-           '# #     # # # # #     #       # #   #',
-           '# ##### # # # ### ##### ##### # #####',
-           '# #   # # #     #     # #   #       #',
-           '# # ### ### ### ##### ### # ##### # #',
-           '# #         #     #       #       # #',
-           '#X###################################',]
 
 
 class Camera(object):
@@ -242,30 +219,36 @@ def main():
     platforms, platform_dict, troll_dictionary = [], [], []
     entities = pygame.sprite.Group()
     x, y = 0, 0
-
-
+    level = create_maze()
 
     while True:
-        rand_x = random.randint(1, len(level) -1)
-        rand_y = random.randint(1, len(level[0]) -1)
+        rand_x = random.randint(1, len(level[0]))
+        rand_y = random.randint(1, len(level))
 
-        if level[rand_x][rand_y] == " ":
-            player.rect.y = rand_x * 32 + 8
-            player.rect.x = rand_y * 32 + 8
-            break
+        try:
+            if level[rand_x][rand_y] == " ":
+                player.rect.x = rand_x * 32 + 8
+                player.rect.y = rand_y * 32 + 8
+                break
+        except IndexError:
+            print(rand_x, rand_y)
 
     while len(troll_dictionary) < 10:
 
-        rand_x = random.randint(1, len(level) -1)
-        rand_y = random.randint(1, len(level[0]) -1)
+        rand_x = random.randint(1, len(level[0]))
+        rand_y = random.randint(1, len(level))
         tmp_troll = Troll(20, 25)
 
-        if level[rand_x][rand_y] == " ":
-            tmp_troll.rect.y = rand_x * 32 + 8
-            tmp_troll.rect.x = rand_y * 32 + 8
+        try:
+            if level[rand_x][rand_y] == " ":
+                tmp_troll.rect.x = rand_x * 32 + 8
+                tmp_troll.rect.y = rand_y * 32 + 8
 
-            troll_dictionary.append(tmp_troll)
-            entities.add(tmp_troll)
+                troll_dictionary.append(tmp_troll)
+                entities.add(tmp_troll)
+        except IndexError:
+            print(rand_x, rand_y)
+
 
     # build the level
     for row in level:
@@ -275,15 +258,21 @@ def main():
                 platforms.append(p)
                 entities.add(p)
                 platform_dict.append((x, y))
-            if col == "X":
-                e = ExitBlock(x, y)
-                platforms.append(e)
-                entities.add(e)
-
 
             x += 32
         y += 32
         x = 0
+
+    while True:
+
+        a = random.randint(1, len(level[0]) -1)
+        b = random.choice([1, len(level) -1])
+
+        if level[b][a] == ' ':
+            e= ExitBlock(a * 32, b * 32)
+            platforms.append(e)
+            entities.add(e)
+            break
 
     total_level_width  = len(level[0])*32
     total_level_height = len(level)*32
