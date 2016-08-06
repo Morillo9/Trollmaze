@@ -142,6 +142,11 @@ class Player(Entity):
                         platform_dict.append((x - 32,  y))
                         platform_dict.remove((x, y))
 
+                    for troll in troll_dictionary:
+                        if sprite.collide_circle(p, troll) is True:
+                            troll_dictionary.remove(troll)
+                            entities.remove(troll)
+
                     self.move_blocks = False
 
 class Troll(Entity):
@@ -208,7 +213,7 @@ class ExitBlock(Platform):
 
 
 def main():
-    global cameraX, cameraY, entities, platforms, bg, platform_dict
+    global cameraX, cameraY, entities, platforms, bg, platform_dict, troll_dictionary
     timer = pygame.time.Clock()
 
     up = down = left = right = running = False
