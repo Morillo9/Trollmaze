@@ -37,6 +37,7 @@ player_up = player_resource.image_at((0, 16, 16, 16), colorkey=(-1))
 player_down = player_resource.image_at((32, 32, 16, 16), colorkey=(-1))
 
 
+
 class Camera(object):
     def __init__(self, camera_func, width, height):
         self.camera_func = camera_func
@@ -211,21 +212,8 @@ class ExitBlock(Platform):
         self.image = exit_sprite
         self.rect = Rect(x, y, 32, 32)
 
-
-def main():
-    global cameraX, cameraY, entities, platforms, bg, platform_dict, troll_dictionary
-    timer = pygame.time.Clock()
-
-    up = down = left = right = running = False
-    bg = Surface((32,32))
-    bg.convert()
-    bg.fill(Color("#181818"))
-    player = Player(16, 16)
-    platforms, platform_dict, troll_dictionary = [], [], []
-    entities = pygame.sprite.Group()
+def CreateLevel(player, level, entities, platforms, exits):
     x, y = 0, 0
-    level = create_maze()
-
     while True:
         rand_x = random.randint(1, len(level[0])-1)
         rand_y = random.randint(1, len(level)-1)
@@ -271,21 +259,51 @@ def main():
         if level[b][a] == ' ':
             e= ExitBlock(a * 32, b * 32)
             platforms.append(e)
+            exits.append(e)
             entities.add(e)
             break
+
+
+def game_intro():
+
+    intro = True
+
+    while intro:
+        screen.fill((255, 255, 255))
+
+        time.wait(200)
+        main_loop()
+        pygame.display.update()
+        timer.tick(60)
+
+
+def main_loop():
+    global  cameraX, cameraY, entities, platforms, bg, platform_dict, \
+            player, troll_dictionary, exits, timer
+    timer = pygame.time.Clock()
+
+    up = down = left = right = running = False
+    bg = Surface((32,32))
+    bg.convert()
+    bg.fill(Color("#181818"))
+    player = Player(16, 16)
+    exits, platforms, platform_dict, troll_dictionary = [], [], [], []
+    entities = pygame.sprite.Group()
+    level = create_maze()
+    CreateLevel(player, level, entities, platforms, exits)
+    gameExit = False
 
     total_level_width  = len(level[0])*32
     total_level_height = len(level)*32
     camera = Camera(complex_camera, total_level_width, total_level_height)
     entities.add(player)
 
-    while 1:
+
+    while not gameExit :
+
         timer.tick(60)
 
         for e in pygame.event.get():
-            if e.type == QUIT: raise SystemExit
-            if e.type == KEYDOWN and e.key == K_ESCAPE:
-                raise SystemExit
             if e.type == KEYDOWN and e.key == K_UP:
                 up = True
                 player.image = player_up
@@ -323,11 +341,15 @@ def main():
 
             if pygame.sprite.collide_circle(troll, player):
                 raise SystemExit
+
+        for exit in exits:
+            if pygame.sprite.collide_circle(exit, player):
+                gameExit = True
+
         for e in entities:
             screen.blit(e.image, camera.apply(e))
 
         pygame.display.update()
 
-
-if __name__ == "__main__":
-    main()
+game_intro()
+main_loop()

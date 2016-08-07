@@ -37,6 +37,3 @@ def create_maze():
     maze = maze[0:-2]
 
     return maze
-
-tmp = create_maze()
-print(len(tmp[0]), len(tmp))
